@@ -10,5 +10,7 @@
 (fn draw []
   (scene.draw))
 
+(fn keypressed [key]
+  (scene.keypressed key))
 
-{: change-scene : update : draw}
+{: change-scene : update : draw : keypressed}

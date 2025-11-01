@@ -11,6 +11,7 @@
 
 (fn love.load []
   ;;(set tick.framerate 60)
+
   (love.graphics.setDefaultFilter "nearest" "nearest")
   (push:setupScreen _G.game-width
                     _G.game-height
@@ -29,3 +30,6 @@
 
 (fn love.resize [w h]
   (push:resize w h))
+
+(fn love.keypressed [key]
+  (scene-manager.keypressed key))
