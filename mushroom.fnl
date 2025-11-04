@@ -10,7 +10,7 @@
     (if (<= mushroom.pressed? 0)
         (set mushroom.pressed? nil)
         (set mushroom.pressed? (- mushroom.pressed? 1))))
-  (set mushroom.hover? (util.cursor-within?  mushroom))
+  (set mushroom.hover? (util.cursor-within? mushroom))
   (set mushroom.clicked? (and mushroom.hover? (love.mouse.isDown 1))))
 
 (fn draw [mushroom]
@@ -27,6 +27,7 @@
   (when mushroom.pitch 
     (set mushroom.pressed? 10)
     (let [s (mushroom.sound:clone)]
+      (ebus.push :note-played {:note mushroom.tone})
       (s:setPitch mushroom.pitch)
       (s:play))))
 
@@ -62,7 +63,7 @@
     :high-c 2
     _ nil))
 
-(fn new [{: x : y : width : height : img : sound
+(fn new [{: x : y : width : height : img
           : tone : sound &as mushroom}]
   (set mushroom.pitch (tone->pitch tone))
   (set mushroom.key (tone->keybind tone))
@@ -71,4 +72,4 @@
     (ebus.subscribe :keypressed (partial keypressed m))
     m))
 
-{: new : draw : update : on-click}
+{: new : draw : update }

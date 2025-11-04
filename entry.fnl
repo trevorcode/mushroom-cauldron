@@ -6,8 +6,8 @@
 
 (local push (require :lib.push))
 (local (window-width window-height) (love.window.getDesktopDimensions))
-(set _G.game-width 1080)
-(set _G.game-height 720)
+(set _G.game-width 384)
+(set _G.game-height 256)
 (local test-scene (require :test_scene))
 
 (fn love.load []
@@ -27,6 +27,7 @@
   (push:finish))
 
 (fn love.update [dt]
+  (ebus.dispatch)
   (scene-manager.update dt))
 
 (fn love.resize [w h]

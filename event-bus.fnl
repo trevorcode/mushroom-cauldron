@@ -1,6 +1,5 @@
 (local subscribers {}) 
 (local events [])
-(local fennel (require :lib.fennel))
 
 (fn subscribe [eventType callback sub-type]
   (let [sub-type (or sub-type :scene)]

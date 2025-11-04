@@ -19,4 +19,13 @@
         point {:x x :y y}]
     (point-within? point boundingBox)))
 
-{: point-within? : cursor-within? : cursor-position}
+(fn notes-equal? [t1 t2]
+  (var equal? true)
+  (if (= (length t1) (length t2))
+      (for [i 1 (length t1) &until (not equal?)]
+        (when (not= (. t1 i) (. t2 i))
+          (set equal? false)))
+      (set equal? false))
+  equal?)
+
+{: point-within? : cursor-within? : cursor-position : notes-equal?}
