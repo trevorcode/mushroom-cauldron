@@ -1,31 +1,42 @@
-(local subscribers {})
+(local subscribers {}) 
 (local events [])
 (local fennel (require :lib.fennel))
 
-(fn subscribe [eventType callback]
-  (case (. subscribers eventType)
-    c (table.insert (. subscribers eventType) callback)
-    _ (set (. subscribers eventType) [callback])))
+(fn subscribe [eventType callback sub-type]
+  (let [sub-type (or sub-type :scene)]
+    (case (. subscribers eventType)
+      c (table.insert (. subscribers eventType) {:sub-type sub-type
+                                                 :callback callback})
+      _ (set (. subscribers eventType) [{:sub-type sub-type
+                                         :callback callback}]))))
+
+(fn clear-subscriptions [sub-type]
+  (each [eventType callbacks (pairs subscribers)]
+    (set (. subscribers eventType)
+         (icollect [_ c (ipairs callbacks)]
+                 (when (not= sub-type c.sub-type)
+                     c)))))
 
 (fn push [eventType event]
   (tset event :type eventType)
   (table.insert events event))
 
-(fn dispatch-one [events event-count]
+(fn dispatch-recur [events event-count]
   (when (and (< 0 (length events))
-             (< event-count 50))
+             (< event-count 100))
     (let [event (table.remove events 1)
           callbacks (. subscribers event.type)]
       (when callbacks 
         (each [_ c (ipairs callbacks)]
-          (c event)))
-      (tail! (dispatch-one events (+ 1 event-count))))))
+          (c.callback event)))
+      (tail! (dispatch-recur events (+ 1 event-count))))))
 
 (fn dispatch []
-  (dispatch-one events 0))
+  (dispatch-recur events 0))
 
 (comment 
- (subscribe :on-click (fn [] (print "yo")))
+ (subscribe :on-click (fn [] (print "yo")) :scene)  
+ (clear-subscriptions :scene)
 
  (push :on-click {:yo "dawg"})
 
@@ -33,4 +44,4 @@
 
  )
 
-{: push : dispatch : subscribe}
+{: push : dispatch : subscribe : clear-subscriptions}
