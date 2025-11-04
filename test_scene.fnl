@@ -1,26 +1,13 @@
 (local test {})
+(local ebus (require :event-bus))
 (local state (require :test-scene-state))
+(local fennel (require :lib.fennel))
+
+(local mushroom (require :mushroom))
 
 (local lg love.graphics)
 
-(fn test.load []
-  (set state.bell-sound (love.audio.newSource :assets/bell.wav :static))
-  (set state.water-sound (love.audio.newSource :assets/water.wav :static))
-  (set _G.rock (love.graphics.newImage :assets/rock.png))
-  (set state.font-test (love.graphics.newFont 48)))
-
-(fn test.update [])
-
-(fn test.draw []
-  (lg.setFont state.font-test)
-  (lg.setColor 0.6 0.6 1)
-  (lg.rectangle :fill 0 0 _G.game-width _G.game-height)
-  (lg.setColor 1 1 1)
-  (lg.draw _G.rock 0 0 0 0.3)
-  (lg.print "Hello from FENNEL!\n" 0 0)
-  (lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1))
-
-(fn test.keypressed [key]
+(fn test.keypressed [{:key key}]
   (if (= key :a)
       (love.event.quit)
 
@@ -46,5 +33,39 @@
         (when pitch 
           (s:setPitch pitch)
           (s:play)))))
+
+(fn test.load []
+  (ebus.subscribe :keypressed (fn [event] (print (fennel.view event))))
+  (ebus.subscribe :keypressed test.keypressed)
+  (set state.bell-sound (love.audio.newSource :assets/bell.wav :static))
+  (set state.water-sound (love.audio.newSource :assets/water.wav :static))
+  (set _G.rock (love.graphics.newImage :assets/rock.png))
+  (set state.font-test (love.graphics.newFont 48))
+  (set state.mushrooms [(mushroom.new {:x 0 :y 0 :width 100 :height 100 :img nil})
+                        (mushroom.new {:x 200 :y 200 :width 100 :height 100 :img nil})
+                        ]))
+
+(fn test.update [dt]
+  (ebus.dispatch)
+  (each [_ m (pairs state.mushrooms)] 
+    (mushroom.update m dt)))
+
+(fn test.draw []
+  (lg.setFont state.font-test)
+  (lg.setColor 0.6 0.6 1)
+  (lg.rectangle :fill 0 0 _G.game-width _G.game-height)
+  (lg.setColor 1 1 1)
+  (lg.draw _G.rock 0 0 0 0.3)
+  (lg.print "Hello from FENNEL!\n" 0 0)
+  (lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1)
+  (each [_ m (pairs state.mushrooms)] 
+    (mushroom.draw m)))
+
+
+(fn test.mousepressed [x y button istouch presses])
+
+(fn test.mousereleased [x y button istouch presses]
+  (each [_ m (pairs state.mushrooms)] 
+    (mushroom.on-click m)))
 
 test

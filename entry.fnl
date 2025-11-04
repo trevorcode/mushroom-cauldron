@@ -2,6 +2,7 @@
 (local tick (require :lib.tick))
 (local scene-manager (require :scene_manager))
 (local fennel (require :lib.fennel))
+(local ebus (require :event-bus))
 
 (local push (require :lib.push))
 (local (window-width window-height) (love.window.getDesktopDimensions))
@@ -32,4 +33,14 @@
   (push:resize w h))
 
 (fn love.keypressed [key]
-  (scene-manager.keypressed key))
+  (ebus.push :keypressed {:key key}))
+
+(fn love.mousepressed [x y button istouch presses]
+  (ebus.push :mousepressed {:x x :y y :button button
+                            :istouch istouch
+                            :presses presses}))
+
+(fn love.mousereleased [x y button istouch presses]
+  (ebus.push :mousereleased {:x x :y y :button button
+                            :istouch istouch
+                            :presses presses}))
