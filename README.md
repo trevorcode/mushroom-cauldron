@@ -13,3 +13,4 @@ Outline Shader:
 https://blogs.love2d.org/content/let-it-glow-dynamically-adding-outlines-characters
 https://forum.gamemaker.io/index.php?threads/solved-problem-with-outline-shader.16721/
 
+All the rest of the art is done by my lovely wife <3
