@@ -52,7 +52,7 @@
 (fn new [{: x : y : width : height &as cauldron}]
   (set cauldron.animations
        {:idle (anim8.newAnimation (assets.cauldron-animation-grid 1 1) 1)
-        :active (anim8.newAnimation (assets.cauldron-animation-grid "1-10" 1) 0.05)})
+        :active (anim8.newAnimation (assets.cauldron-animation-grid "1-11" 1) 0.1)})
   (set cauldron.animation cauldron.animations.idle)
   (let [c cauldron]
     (ebus.subscribe :mousepressed (partial on-click c))

@@ -5,6 +5,7 @@
 (local ebus (require :event-bus))
 
 (local push (require :lib.push))
+(local flux (require :lib.flux))
 (local (window-width window-height) (love.window.getDesktopDimensions))
 (set _G.game-width 384)
 (set _G.game-height 256)
@@ -34,6 +35,7 @@
 
 (fn love.update [dt]
   (ebus.dispatch)
+  (flux.update dt)
   (scene-manager.update dt))
 
 (fn love.resize [w h]

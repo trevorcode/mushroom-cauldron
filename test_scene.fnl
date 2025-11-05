@@ -6,6 +6,7 @@
 (local songs (require :songs))
 (local assets (require :assets))
 (local anim8 (require :lib.anim8))
+(local flux (require :lib.flux))
 
 (local mushroom (require :mushroom))
 (local cauldron (require :cauldron))
@@ -40,12 +41,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 (set assets.outline-shader (love.graphics.newShader outline-shader-code))
 
 (fn mushroom-played [{:note note}]
-  (table.insert state.notes note)
-  (each [_ song (ipairs songs)]
-    (when (util.notes-equal? state.notes song.notes)
-      (set state.notes [])
-      (ebus.push :song-played song)
-      (print song.name))))
+  (local falling-mushroom {:image nil :x (+ 192 (love.math.random -25 25)) :y 0
+                           :note note})
+  (: (flux.to falling-mushroom 1 {:y 140}) :ease "quadin")
+  (table.insert state.falling-mushrooms falling-mushroom))
 
 (fn cauldron-clear []
   (set state.notes []))
@@ -75,7 +74,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (ebus.subscribe :note-played mushroom-played)
   (ebus.subscribe :cauldron-cleared cauldron-clear)
   (load-assets)
-  (set state.cauldron (cauldron.new {:x 100 :y 100 :width (* 2 76) :height (* 2 49)}))
+  (set state.cauldron (cauldron.new {:x 118 :y 112 :width (* 2 76) :height (* 2 49)}))
   (set state.mushrooms [(mushroom.new {:x 0 :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :c})
                         (mushroom.new {:x (* 46 1) :y 200 :width 44 :height 44 
@@ -95,18 +94,51 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 
 (fn test.update [dt]
   (cauldron.update state.cauldron state.notes dt)
+  (each [i m (pairs state.falling-mushrooms)] 
+    (when (< 135 m.y)
+      (table.insert state.notes m.note)
+      (each [_ song (ipairs songs)]
+        (when (util.notes-equal? state.notes song.notes)
+          (set state.notes [])
+          (ebus.push :song-played song)
+          (print song.name)))
+      (table.remove state.falling-mushrooms i)))
+
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.update m dt)))
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
-  (lg.print (fennel.view state.notes) 0 50)
+  ;;(lg.print (fennel.view state.notes) 0 50)
   (lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1)
   (cauldron.draw state.cauldron)
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.draw m))
-  
 
-  )
+  (each [_ m (pairs state.falling-mushrooms)] 
+    (let [color (case m.note
+                  :c [0.6 0 0.6]
+                  :d [0.3 0 0.6]
+                  :e [0 0.4 0.8]
+                  :f [0 0.4 0]
+                  :g [0.9 0.9 0.4]
+                  :a [0.9 0.6 0.2]
+                  :b [0.7 0.1 0.1]
+                  :high-c [0.3 0.2 0.1])]
+      (lg.setColor color)
+      (lg.rectangle :fill m.x m.y 6 6)))
+
+  (each [i note (ipairs state.notes)]
+    (let [color (case note
+                  :c [0.6 0 0.6]
+                  :d [0.3 0 0.6]
+                  :e [0 0.4 0.8]
+                  :f [0 0.4 0]
+                  :g [0.9 0.9 0.4]
+                  :a [0.9 0.6 0.2]
+                  :b [0.7 0.1 0.1]
+                  :high-c [0.3 0.2 0.1])]
+      (lg.setColor color))
+    (lg.rectangle :fill (- (* i 8) 6) (- _G.game-height 8) 6 6)))
 
 test
