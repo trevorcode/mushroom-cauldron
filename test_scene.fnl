@@ -10,6 +10,7 @@
 
 (local mushroom (require :mushroom))
 (local cauldron (require :cauldron))
+(local tab (require :chartab))
 
 (local lg love.graphics)
 
@@ -41,12 +42,13 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 (set assets.outline-shader (love.graphics.newShader outline-shader-code))
 
 (fn mushroom-played [{:note note}]
-  (local falling-mushroom {:image nil :x (+ 192 (love.math.random -25 25)) :y 0
+  (local falling-mushroom {:image nil :x (+ 192 (love.math.random -25 25)) :y 50
                            :note note})
-  (: (flux.to falling-mushroom 1 {:y 140}) :ease "quadin")
+  (: (flux.to falling-mushroom 0.8 {:y 140}) :ease "quadin")
   (table.insert state.falling-mushrooms falling-mushroom))
 
 (fn cauldron-clear []
+  (set state.falling-mushrooms [])
   (set state.notes []))
 
 (fn test.keypressed [{:key key}]
@@ -74,6 +76,8 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (ebus.subscribe :note-played mushroom-played)
   (ebus.subscribe :cauldron-cleared cauldron-clear)
   (load-assets)
+  (tab.load-assets)
+  (set state.tab (tab.new))
   (set state.cauldron (cauldron.new {:x 118 :y 112 :width (* 2 76) :height (* 2 49)}))
   (set state.mushrooms [(mushroom.new {:x 0 :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :c})
@@ -105,7 +109,8 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
       (table.remove state.falling-mushrooms i)))
 
   (each [_ m (pairs state.mushrooms)] 
-    (mushroom.update m dt)))
+    (mushroom.update m dt))
+  (tab.update state.tab dt))
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
@@ -139,6 +144,8 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                   :b [0.7 0.1 0.1]
                   :high-c [0.3 0.2 0.1])]
       (lg.setColor color))
-    (lg.rectangle :fill (- (* i 8) 6) (- _G.game-height 8) 6 6)))
+    (lg.rectangle :fill (- (* i 8) 6) (- _G.game-height 8) 6 6))
+  (lg.setColor 1 1 1)
+  (tab.draw state.tab))
 
 test
