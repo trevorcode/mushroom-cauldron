@@ -94,18 +94,28 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                         (mushroom.new {:x (* 46 6) :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :b})
                         (mushroom.new {:x (* 46 7) :y 200 :width 44 :height 44 
-                                       :sound assets.bell-sound :tone :high-c})]))
+                                       :sound assets.bell-sound :tone :high-c})])
+
+  (set state.startTime (love.timer.getTime)))
 
 (fn test.update [dt]
   (cauldron.update state.cauldron state.notes dt)
   (each [i m (pairs state.falling-mushrooms)] 
     (when (< 135 m.y)
       (table.insert state.notes m.note)
-      (each [_ song (ipairs songs)]
-        (when (util.notes-equal? state.notes song.notes)
-          (set state.notes [])
-          (ebus.push :song-played song)
-          (print song.name)))
+      (when (and (util.notes-equal? state.notes state.tab.song.notes)
+                 (not state.tab.completed?))
+        (set state.tab.completed? true)
+        (set state.notes [])
+        (ebus.push :song-played state.tab.song)
+        (tab.dismiss state.tab 
+                     (fn []
+                       (if (= 0 (length songs))
+                           (do 
+                             (set state.elapsedTime
+                                  (- (love.timer.getTime) state.startTime))
+                             (set state.win? true))
+                           (set state.tab (tab.new))))))
       (table.remove state.falling-mushrooms i)))
 
   (each [_ m (pairs state.mushrooms)] 
@@ -114,8 +124,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
-  ;;(lg.print (fennel.view state.notes) 0 50)
-  (lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1)
+  ;;(lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1)
+  (if state.win? 
+      (lg.print state.elapsedTime (- _G.game-width 70) 0 0 1)
+      (lg.print (- (love.timer.getTime) state.startTime) (- _G.game-width 70) 0 0 1))
   (cauldron.draw state.cauldron)
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.draw m))
@@ -146,6 +158,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
       (lg.setColor color))
     (lg.rectangle :fill (- (* i 8) 6) (- _G.game-height 8) 6 6))
   (lg.setColor 1 1 1)
-  (tab.draw state.tab))
+  (tab.draw state.tab)
+
+  (when state.win?
+    (lg.print "You win!" 120 (- (/ _G.game-height 2) 80)
+              0 2 2)))
 
 test
