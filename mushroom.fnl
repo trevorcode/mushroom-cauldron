@@ -5,30 +5,6 @@
 
 (local lg love.graphics)
 
-(var shader-code
-     "extern vec4 outlineColor;
-extern vec2 stepSize; 
-
-vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screen_coords) {
-    vec4 pixel = Texel(texture, uv);
-    if (pixel.a > 0.0) return pixel * color;
-
-    float dx = 1.0 / stepSize.x;
-    float dy = 1.0 / stepSize.y;
-
-    float alpha = 0.0;
-    alpha += Texel(texture, uv + vec2(dx, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(-dx, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, dy)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, -dy)).a;
-
-    if (alpha > 0.0) return outlineColor;
-    return vec4(0.0, 0.0, 0.0, 0.0);
-}
-"
-     )
-(local shader (love.graphics.newShader shader-code))
-
 (fn update [mushroom dt]
   (mushroom.animation:update dt)
   (when mushroom.pressed? 
@@ -40,26 +16,15 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screen_coords) {
   (set mushroom.clicked? (and mushroom.hover? (love.mouse.isDown 1))))
 
 (fn draw [mushroom]
-  ;; (if mushroom.hover? 
-  ;;     ;;(lg.setColor 0.2 0.2 1)
-  ;;     ;;(lg.setColor 0.8 0.8 1)
-  ;;     ) 
-  ;; (when mushroom.clicked?
-  ;;   ;;(lg.setColor 0.1 0.8 1)
-  ;;   )
-  ;; (when mushroom.pressed?
-  ;;   ;;(lg.setColor 0.8 0.2 1)
-  ;;   )
   (lg.setColor 1 1 1)
   (when (or mushroom.hover?
             mushroom.pressed?) 
-    (lg.setShader shader)
-    (shader:send "outlineColor" [1 1 1 1])
+    (lg.setShader assets.outline-shader)
+    (assets.outline-shader:send "outlineColor" [1 1 1 1])
     (local (w h) (assets.mushroom-sheet:getDimensions))
-    (shader:send "stepSize" [w h]))
+    (assets.outline-shader:send "stepSize" [(/ 1 w) (/ 1 h)]))
   (mushroom.animation:draw assets.mushroom-sheet mushroom.x mushroom.y 0 2 2)
-  (lg.setShader)
-  )
+  (lg.setShader))
 
 (fn activate [mushroom]
   (when mushroom.pitch 
@@ -117,7 +82,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screen_coords) {
     :high-c 8
     _ nil))
 
-(fn new [{: x : y : width : height : img
+(fn new [{: x : y : width : height
           : tone : sound &as mushroom}]
   (set mushroom.pitch (tone->pitch tone))
   (set mushroom.key (tone->keybind tone))
