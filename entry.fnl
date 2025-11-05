@@ -19,6 +19,12 @@
                     (* 0.4 window-width)
                     (* 0.4 window-height)
                     {:vsync true :resizable true})
+  (local myFont (love.graphics.newImageFont
+                 :assets/imagefont.png
+                 (.. " abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ0"
+                     "123456789.,!?-+/():;%&`'*#=[]\"")))
+  (love.graphics.setFont myFont)
   (scene-manager.change-scene test-scene))
 
 (fn love.draw []
