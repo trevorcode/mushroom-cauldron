@@ -3,6 +3,7 @@
 (local fennel (require :lib.fennel))
 (local ebus (require :event-bus))
 
+(local assets (require :assets))
 (local push (require :lib.push))
 (local flux (require :lib.flux))
 (local (window-width window-height) (love.window.getDesktopDimensions))
@@ -21,6 +22,7 @@
                  (.. " abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0"
                      "123456789.,!?-+/():;%&`'*#=[]\"")))
+  (assets.load-assets)
   (love.graphics.setFont myFont)
   (ebus.push :change-scene {:new-scene :title-scene}))
 

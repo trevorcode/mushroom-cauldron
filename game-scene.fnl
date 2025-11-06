@@ -1,6 +1,6 @@
-(local test {})
+(local scene {})
 (local ebus (require :event-bus))
-(var state (require :test-scene-state))
+(var state (require :game-scene-state))
 (local fennel (require :lib.fennel))
 (local util (require :util))
 (local songs (require :songs))
@@ -16,33 +16,6 @@
 (local button (require :button))
 
 (local lg love.graphics)
-
-(var outline-shader-code
-     "extern vec4 outlineColor;
-extern vec2 stepSize; 
-
-vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
-    vec4 pixel = Texel(texture, uv);
-    if (pixel.a > 0.0) {
-      return pixel * color;
-    }
-
-    float alpha = 0.0;
-    alpha += Texel(texture, uv + vec2(stepSize.x, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(-stepSize.x, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, stepSize.y)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, -stepSize.y)).a;
-
-    if (alpha > 0.0) {
-      return outlineColor;
-    }
-    else {
-      return vec4(0.0, 0.0, 0.0, 0.0);
-    }
-}
-")
-
-(set assets.outline-shader (love.graphics.newShader outline-shader-code))
 
 (fn mushroom-played [{:note note}]
   (local falling-mushroom {:x (+ 192 (love.math.random -25 25))
@@ -63,36 +36,11 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 (fn book-close []
   (set state.book-open? nil))
 
-(fn load-assets []
-  (set assets.bell-sound (love.audio.newSource :assets/bell.wav :static))
-  (set assets.complete-sound (love.audio.newSource :assets/complete.mp3 :static))
-  (set assets.water-sound (love.audio.newSource :assets/water.wav :static))
-  (set assets.background (love.graphics.newImage :assets/mushroomcauldronbackground.png))
-  (set assets.bigbook (love.graphics.newImage :assets/bigbook.png))
-  (set assets.littlebook (love.graphics.newImage :assets/littlebook.png))
-  (set assets.potion (love.graphics.newImage :assets/potion.png))
-  (set assets.cat-sheet (love.graphics.newImage :assets/cat.png))
-  (set assets.cat-animation-grid
-       (anim8.newGrid 26 20
-                      (assets.cat-sheet:getWidth)
-                      (assets.cat-sheet:getHeight)))
-  (set assets.cauldron-sheet (love.graphics.newImage :assets/cauldron.png))
-  (set assets.cauldron-animation-grid
-       (anim8.newGrid 76 49
-                      (assets.cauldron-sheet:getWidth)
-                      (assets.cauldron-sheet:getHeight)))
-  (set assets.mushroom-sheet (love.graphics.newImage :assets/mushrooms.png))
-  (set assets.mushroom-animation-grid
-       (anim8.newGrid 22 22
-                      (assets.mushroom-sheet:getWidth)
-                      (assets.mushroom-sheet:getHeight))))
-
-(fn test.load []
+(fn scene.load []
   (ebus.subscribe :note-played mushroom-played)
   (ebus.subscribe :cauldron-cleared cauldron-clear)
   (ebus.subscribe :book-open book-open)
   (ebus.subscribe :book-close book-close)
-  (load-assets)
   (tab.load-assets)
   (set state {})
   (set state.notes [])
@@ -129,11 +77,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
        (button.new {:x 150 :y 85 :text "Restart"
                     :width 80 :height 18
                     :t-off-x 7 :t-off-y 2
+                    :keybinding :g
                     :onclick
                     (fn []
                        (ebus.push :change-scene {:new-scene :title-scene}))}))) 
 
-(fn test.update [dt]
+(fn scene.update [dt]
   (state.cat-anim:update dt)
   (cauldron.update state.cauldron state.notes dt)
   (each [i m (pairs state.falling-mushrooms)] 
@@ -161,7 +110,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     (button.update state.replay-button dt))
   )
 
-(fn test.draw []
+(fn scene.draw []
   (lg.draw assets.background 0 0 0 2 2)
   (lg.draw assets.potion 85 150 0 2 2)
   (state.cat-anim:draw assets.cat-sheet 190 65 0 2 2)
@@ -205,14 +154,13 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     (lg.print "You win!" 120 (- (/ _G.game-height 2) 80)
               0 2 2))
 
-  (when state.book-open?
-    (bigbook.draw))
-
   (when state.replay-button
     (button.draw state.replay-button))
-  )
 
-(fn test.keypressed [key]
+  (when state.book-open?
+    (bigbook.draw)))
+
+(fn scene.keypressed [key]
   (when (not state.book-open?)
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.keypressed m key))
@@ -225,7 +173,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (when state.replay-button
     (button.keypressed state.replay-button key)))
 
-(fn test.mousepressed [x y mouse-button istouch presses]
+(fn scene.mousepressed [x y mouse-button istouch presses]
   (when (not state.book-open?)
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.on-click m))
@@ -238,6 +186,6 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (when state.replay-button
     (button.mousepressed state.replay-button)))
 
-(fn test.mousereleased [x y button istouch presses])
+(fn scene.mousereleased [x y button istouch presses])
 
-test
+scene
