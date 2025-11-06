@@ -12,6 +12,7 @@
 (local cauldron (require :cauldron))
 (local tab (require :chartab))
 (local book (require :book))
+(local bigbook (require :bigbook))
 
 (local lg love.graphics)
 
@@ -55,6 +56,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (set state.falling-mushrooms [])
   (set state.notes []))
 
+(fn book-open []
+  (set state.book-open? true))
+
+(fn book-close []
+  (set state.book-open? nil))
+
 (fn load-assets []
   (set assets.bell-sound (love.audio.newSource :assets/bell.wav :static))
   (set assets.complete-sound (love.audio.newSource :assets/complete.mp3 :static))
@@ -76,9 +83,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 (fn test.load []
   (ebus.subscribe :note-played mushroom-played)
   (ebus.subscribe :cauldron-cleared cauldron-clear)
+  (ebus.subscribe :book-open book-open)
+  (ebus.subscribe :book-close book-close)
   (load-assets)
   (tab.load-assets)
-  (set state.tab (tab.new))
+  (set state.songs (songs.new))
+  (set state.tab (tab.new state.songs))
   (set state.cauldron (cauldron.new {:x 118 :y 112 :width (* 2 76) :height (* 2 49)}))
   (set state.mushrooms [(mushroom.new {:x 0 :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :c})
@@ -98,7 +108,6 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                                        :sound assets.bell-sound :tone :high-c})])
 
   (set state.littlebook (book.new {:x 285 :y 140}))
-
   (set state.startTime (love.timer.getTime)))
 
 (fn test.update [dt]
@@ -114,18 +123,19 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
         (ebus.push :song-played state.tab.song)
         (tab.dismiss state.tab 
                      (fn []
-                       (if (= 0 (length songs))
+                       (if (= 0 (length state.songs))
                            (do 
                              (set state.elapsedTime
                                   (- (love.timer.getTime) state.startTime))
                              (set state.win? true))
-                           (set state.tab (tab.new))))))
+                           (set state.tab (tab.new state.songs))))))
       (table.remove state.falling-mushrooms i)))
 
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.update m dt))
   (book.update state.littlebook dt)
-  (tab.update state.tab dt))
+  (tab.update state.tab dt)
+  (bigbook.update dt))
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
@@ -167,20 +177,33 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 
   (when state.win?
     (lg.print "You win!" 120 (- (/ _G.game-height 2) 80)
-              0 2 2)))
+              0 2 2))
+
+  (when state.book-open?
+    (bigbook.draw)))
 
 (fn test.keypressed [key]
   (if (= key :a)
       (love.event.quit))
 
-  (each [_ m (pairs state.mushrooms)] 
-    (mushroom.keypressed m key))
-  (cauldron.keypressed state.cauldron key))
+  (when (not state.book-open?)
+    (each [_ m (pairs state.mushrooms)] 
+      (mushroom.keypressed m key))
+    (cauldron.keypressed state.cauldron key)
+    (book.keypressed state.littlebook key))
+
+  (when state.book-open?
+    (bigbook.keypressed key)))
 
 (fn test.mousepressed [x y button istouch presses]
-  (each [_ m (pairs state.mushrooms)] 
-    (mushroom.on-click m))
-  (cauldron.on-click state.cauldron))
+  (when (not state.book-open?)
+    (each [_ m (pairs state.mushrooms)] 
+      (mushroom.on-click m))
+    (cauldron.on-click state.cauldron)
+    (book.on-click state.littlebook))
+
+  (when state.book-open?
+    (bigbook.mousepressed)))
 
 (fn test.mousereleased [x y button istouch presses])
 

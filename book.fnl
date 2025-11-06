@@ -22,6 +22,7 @@
 
 (fn activate [book]
   (set book.pressed? 10)
+  (ebus.push :book-open {})
   (: (assets.water-sound:clone) :play))
 
 (fn on-click [book]

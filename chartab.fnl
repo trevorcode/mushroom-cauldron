@@ -1,6 +1,5 @@
 (local ebus (require :event-bus))
 (local assets (require :assets))
-(local songs (require :songs))
 (local flux (require :lib.flux))
 
 (local lg love.graphics)
@@ -18,7 +17,7 @@
   (lg.draw assets.customers tab.character-img tab.x tab.y 0 2 2)
   (lg.print tab.song.name (+ 36 tab.x) (+ 8 tab.y)))
 
-(fn new []
+(fn new [songs]
   (let [portraits [(lg.newQuad 0 0 16 16 assets.customers)
                    (lg.newQuad 16 0 16 16 assets.customers)
                    (lg.newQuad 32 0 16 16 assets.customers)]
