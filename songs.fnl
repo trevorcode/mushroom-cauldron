@@ -1,8 +1,6 @@
 (fn new []
   [{:name "Health Potion"
     :notes [:c :d :e :f :g]}
-   {:name "Test Potion"
-    :notes [:c :d :e :f :g :c :c :c :high-c :d :d :d :d :d :d :d :d :d :e :f :g :g :a :b :c]}
    {:name "Stamina Potion"
     :notes [:g :g :g :g]}
    {:name "Stealth Potion"

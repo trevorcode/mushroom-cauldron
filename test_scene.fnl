@@ -69,6 +69,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (set assets.background (love.graphics.newImage :assets/mushroomcauldronbackground.png))
   (set assets.bigbook (love.graphics.newImage :assets/bigbook.png))
   (set assets.littlebook (love.graphics.newImage :assets/littlebook.png))
+  (set assets.potion (love.graphics.newImage :assets/potion.png))
+  (set assets.cat-sheet (love.graphics.newImage :assets/cat.png))
+  (set assets.cat-animation-grid
+       (anim8.newGrid 22 20
+                      (assets.cat-sheet:getWidth)
+                      (assets.cat-sheet:getHeight)))
   (set assets.cauldron-sheet (love.graphics.newImage :assets/cauldron.png))
   (set assets.cauldron-animation-grid
        (anim8.newGrid 76 49
@@ -107,10 +113,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                         (mushroom.new {:x (* 46 7) :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :high-c})])
 
+  (set state.cat-anim (anim8.newAnimation (assets.cat-animation-grid "1-11" 1) 0.1))
   (set state.littlebook (book.new {:x 285 :y 140}))
   (set state.startTime (love.timer.getTime)))
 
 (fn test.update [dt]
+  (state.cat-anim:update dt)
   (cauldron.update state.cauldron state.notes dt)
   (each [i m (pairs state.falling-mushrooms)] 
     (when (< 135 m.y)
@@ -139,6 +147,8 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
+  (lg.draw assets.potion 85 150 0 2 2)
+  (state.cat-anim:draw assets.cat-sheet 190 65 0 2 2)
   (if state.win? 
       (lg.print (string.format "%.2f" state.elapsedTime) (- _G.game-width 40) 0 0 1)
       (lg.print (string.format "%.2f" (- (love.timer.getTime) state.startTime)) (- _G.game-width 40) 0 0 1))

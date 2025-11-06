@@ -10,8 +10,8 @@
   (local shadow-offset (if b.pressed? -1 -3))
   (lg.rectangle :fill b.x b.y b.width b.height)
   (if b.hover? 
-      (lg.setColor 0.8 0.8 0.8)
-      (lg.setColor 0.9 0.9 0.5))
+      (lg.setColor 0.7 0.7 0.7)
+      (lg.setColor 0.9 0.9 0.4))
   (lg.rectangle :fill (+ b.x shadow-offset) (+ b.y shadow-offset) b.width b.height)
   (lg.setColor 1 1 1)
   (lg.print b.text
