@@ -1,6 +1,6 @@
 (local test {})
 (local ebus (require :event-bus))
-(local state (require :test-scene-state))
+(var state (require :test-scene-state))
 (local fennel (require :lib.fennel))
 (local util (require :util))
 (local songs (require :songs))
@@ -13,6 +13,7 @@
 (local tab (require :chartab))
 (local book (require :book))
 (local bigbook (require :bigbook))
+(local button (require :button))
 
 (local lg love.graphics)
 
@@ -72,7 +73,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (set assets.potion (love.graphics.newImage :assets/potion.png))
   (set assets.cat-sheet (love.graphics.newImage :assets/cat.png))
   (set assets.cat-animation-grid
-       (anim8.newGrid 22 20
+       (anim8.newGrid 26 20
                       (assets.cat-sheet:getWidth)
                       (assets.cat-sheet:getHeight)))
   (set assets.cauldron-sheet (love.graphics.newImage :assets/cauldron.png))
@@ -93,6 +94,9 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
   (ebus.subscribe :book-close book-close)
   (load-assets)
   (tab.load-assets)
+  (set state {})
+  (set state.notes [])
+  (set state.falling-mushrooms [])
   (set state.songs (songs.new))
   (set state.tab (tab.new state.songs))
   (set state.cauldron (cauldron.new {:x 118 :y 112 :width (* 2 76) :height (* 2 49)}))
@@ -113,9 +117,21 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                         (mushroom.new {:x (* 46 7) :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :high-c})])
 
-  (set state.cat-anim (anim8.newAnimation (assets.cat-animation-grid "1-11" 1) 0.1))
+  (set state.cat-anim (anim8.newAnimation (assets.cat-animation-grid "1-18" 1) 0.125))
   (set state.littlebook (book.new {:x 285 :y 140}))
   (set state.startTime (love.timer.getTime)))
+
+(fn set-win []
+  (set state.elapsedTime
+       (- (love.timer.getTime) state.startTime))
+  (set state.win? true)
+  (set state.replay-button
+       (button.new {:x 150 :y 85 :text "Restart"
+                    :width 80 :height 18
+                    :t-off-x 7 :t-off-y 2
+                    :onclick
+                    (fn []
+                       (ebus.push :change-scene {:new-scene :title-scene}))}))) 
 
 (fn test.update [dt]
   (state.cat-anim:update dt)
@@ -132,10 +148,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
         (tab.dismiss state.tab 
                      (fn []
                        (if (= 0 (length state.songs))
-                           (do 
-                             (set state.elapsedTime
-                                  (- (love.timer.getTime) state.startTime))
-                             (set state.win? true))
+                           (set-win)
                            (set state.tab (tab.new state.songs))))))
       (table.remove state.falling-mushrooms i)))
 
@@ -143,7 +156,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     (mushroom.update m dt))
   (book.update state.littlebook dt)
   (tab.update state.tab dt)
-  (bigbook.update dt))
+  (bigbook.update dt)
+  (when state.replay-button
+    (button.update state.replay-button dt))
+  )
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
@@ -190,12 +206,13 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
               0 2 2))
 
   (when state.book-open?
-    (bigbook.draw)))
+    (bigbook.draw))
+
+  (when state.replay-button
+    (button.draw state.replay-button))
+  )
 
 (fn test.keypressed [key]
-  (if (= key :a)
-      (love.event.quit))
-
   (when (not state.book-open?)
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.keypressed m key))
@@ -203,9 +220,12 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     (book.keypressed state.littlebook key))
 
   (when state.book-open?
-    (bigbook.keypressed key)))
+    (bigbook.keypressed key))
 
-(fn test.mousepressed [x y button istouch presses]
+  (when state.replay-button
+    (button.keypressed state.replay-button key)))
+
+(fn test.mousepressed [x y mouse-button istouch presses]
   (when (not state.book-open?)
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.on-click m))
@@ -213,7 +233,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     (book.on-click state.littlebook))
 
   (when state.book-open?
-    (bigbook.mousepressed)))
+    (bigbook.mousepressed))
+
+  (when state.replay-button
+    (button.mousepressed state.replay-button)))
 
 (fn test.mousereleased [x y button istouch presses])
 

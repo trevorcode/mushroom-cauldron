@@ -26,7 +26,7 @@
         (button.new {:text "Back" :x 70 :y 160 :width 50 :height 18
                      :t-off-x 5 :t-off-y 1 :keybinding :k
                      :onclick next-page})
-        (button.new {:text "X" :x 310 :y 20 :width 15 :height 18
+        (button.new {:text "X" :x 310 :y 45 :width 15 :height 18
                      :t-off-x 3 :t-off-y 1 :keybinding :h
                      :onclick close})])
 
@@ -41,12 +41,15 @@
                   :a [0.9 0.6 0.2]
                   :b [0.7 0.1 0.1]
                   :high-c [0.3 0.2 0.1])
-          row (math.floor (/ (- i 1) 10))
-          new-x (+ x (* (% (- i 1) 10) 12))
+          row (math.floor (/ (- i 1) 8))
+          new-x (+ x (* (% (- i 1) 8) 12))
           new-y (+ y (* 14 row))]
       (lg.setColor color)
       (lg.rectangle :fill new-x new-y 10 10)))
   (lg.setColor 1 1 1))
+
+(fn print-song-name [song-name x y]
+  (lg.print (string.gsub song-name " " "\n") x y))
 
 (fn bigbook.draw []
   (let [song1-index (+ 1 (* 2 (- page 1)))
@@ -54,14 +57,14 @@
         song1 (. songs song1-index)
         song2 (?. songs song2-index)]
     (lg.draw assets.bigbook -100 -40 0 3 3)
-    (lg.print song1-index 100 190)
-    (lg.print song1.name 50 50)
-    (draw-notes song1.notes 50 80)
+    (lg.print song1-index 105 180)
+    (print-song-name song1.name 70 50)
+    (draw-notes song1.notes 70 90)
     
     (when song2 
-      (lg.print song2-index 260 190)
-      (lg.print song2.name 205 50)
-      (draw-notes song2.notes 205 80))
+      (lg.print song2-index 265 180)
+      (print-song-name song2.name 215 50)
+      (draw-notes song2.notes 215 90))
 
     (each [_ b (ipairs buttons)]
       (button.draw b))))

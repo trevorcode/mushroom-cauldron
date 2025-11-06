@@ -11,12 +11,13 @@
   (lg.rectangle :fill b.x b.y b.width b.height)
   (if b.hover? 
       (lg.setColor 0.7 0.7 0.7)
-      (lg.setColor 0.9 0.9 0.4))
+      (lg.setColor (/ 241 255) (/ 140 255) (/ 72 255)))
   (lg.rectangle :fill (+ b.x shadow-offset) (+ b.y shadow-offset) b.width b.height)
   (lg.setColor 1 1 1)
   (lg.print b.text
             (+ b.x b.t-off-x shadow-offset)
-            (+ b.y b.t-off-y shadow-offset)))
+            (+ b.y b.t-off-y shadow-offset)
+            0 b.txt-size b.txt-size ))
 
 (fn mousepressed [b]
   (when (util.cursor-within? b)
@@ -28,7 +29,9 @@
 
 (fn new [{: text : x : y : width : height
           : t-off-x : t-off-y : onclick : keybinding
+          : txt-size
           &as button}]
+  (set button.txt-size (or txt-size 1))
   (set button.keypressed (or keypressed (fn [])))
   button)
 

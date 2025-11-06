@@ -1,10 +1,20 @@
 (local subscribers {}) 
 (local events [])
 
-(fn subscribe [eventType callback]
-  (case (?. subscribers eventType)
-    e (table.insert e callback)
-    nil (set (. subscribers eventType) [callback])))
+(fn subscribe [eventType callback ?category]
+  (let [category (or ?category :scene)]
+    (case (?. subscribers eventType)
+      e (table.insert e {:callback callback
+                         :category category})
+      nil (set (. subscribers eventType) [{:callback callback
+                                           :category category}]))))
+
+(fn clear-subscriptions [category]
+  (each [eventType callbacks (pairs subscribers)]
+    (set (. subscribers eventType)
+         (icollect [_ c (ipairs callbacks)]
+                 (when (not= category c.category)
+                     c)))))
 
 (fn push [eventType event]
   (tset event :type eventType)
@@ -17,7 +27,7 @@
           callbacks (?. subscribers event.type)]
       (when callbacks 
         (each [_ c (ipairs callbacks)]
-          (c event)))
+          (c.callback event)))
       (tail! (dispatch-recur events (+ 1 event-count))))))
 
 (fn dispatch []
@@ -28,4 +38,4 @@
  (push :on-click {:yo "dawg"})
  (dispatch))
 
-{: push : dispatch : subscribe}
+{: push : dispatch : subscribe : clear-subscriptions}

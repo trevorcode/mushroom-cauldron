@@ -1,8 +1,8 @@
 (fn new []
   [{:name "Health Potion"
-    :notes [:c :d :e :f :g]}
+    :notes [:g]}
    {:name "Stamina Potion"
-    :notes [:g :g :g :g]}
+    :notes [:g]}
    {:name "Stealth Potion"
     :notes [:g :g :g :g]}
    {:name "Freeze Potion"

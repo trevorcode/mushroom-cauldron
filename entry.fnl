@@ -8,7 +8,6 @@
 (local (window-width window-height) (love.window.getDesktopDimensions))
 (set _G.game-width 384)
 (set _G.game-height 256)
-(local test-scene (require :test_scene))
 
 (fn love.load []
   (love.graphics.setDefaultFilter "nearest" "nearest")
@@ -23,7 +22,7 @@
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0"
                      "123456789.,!?-+/():;%&`'*#=[]\"")))
   (love.graphics.setFont myFont)
-  (scene-manager.change-scene test-scene))
+  (ebus.push :change-scene {:new-scene :title-scene}))
 
 (fn love.draw []
   (push:start)

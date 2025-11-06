@@ -89,9 +89,7 @@
        {:idle (anim8.newAnimation (assets.mushroom-animation-grid 1 (tone->anim-column tone)) 1)
         :active (anim8.newAnimation (assets.mushroom-animation-grid "1-4" (tone->anim-column tone) 1 (tone->anim-column tone)) 0.05 :pauseAtEnd)})
   (set mushroom.animation mushroom.animations.idle)
-  (let [m mushroom]
-    (ebus.subscribe :mousepressed (partial on-click m))
-    (ebus.subscribe :keypressed (partial keypressed m))
-    m))
+  mushroom
+  )
 
 {: new : draw : update : on-click : keypressed }
