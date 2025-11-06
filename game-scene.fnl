@@ -165,26 +165,24 @@
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.keypressed m key))
     (cauldron.keypressed state.cauldron key)
-    (book.keypressed state.littlebook key))
+    (book.keypressed state.littlebook key)
+    (when state.replay-button
+      (button.keypressed state.replay-button key)))
 
   (when state.book-open?
-    (bigbook.keypressed key))
-
-  (when state.replay-button
-    (button.keypressed state.replay-button key)))
+    (bigbook.keypressed key)))
 
 (fn scene.mousepressed [x y mouse-button istouch presses]
   (when (not state.book-open?)
     (each [_ m (pairs state.mushrooms)] 
       (mushroom.on-click m))
     (cauldron.on-click state.cauldron)
-    (book.on-click state.littlebook))
+    (book.on-click state.littlebook)
+    (when state.replay-button
+      (button.mousepressed state.replay-button)))
 
   (when state.book-open?
-    (bigbook.mousepressed))
-
-  (when state.replay-button
-    (button.mousepressed state.replay-button)))
+    (bigbook.mousepressed)))
 
 (fn scene.mousereleased [x y button istouch presses])
 
