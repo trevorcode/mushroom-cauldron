@@ -11,6 +11,7 @@
 (local mushroom (require :mushroom))
 (local cauldron (require :cauldron))
 (local tab (require :chartab))
+(local book (require :book))
 
 (local lg love.graphics)
 
@@ -42,23 +43,25 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 (set assets.outline-shader (love.graphics.newShader outline-shader-code))
 
 (fn mushroom-played [{:note note}]
-  (local falling-mushroom {:image nil :x (+ 192 (love.math.random -25 25)) :y 50
+  (local falling-mushroom {:x (+ 192 (love.math.random -25 25))
+                           :y 80
                            :note note})
-  (: (flux.to falling-mushroom 0.8 {:y 140}) :ease "quadin")
+  (-> 
+   (flux.to falling-mushroom 0.5 {:y 140})
+   (: :ease "quadin"))
   (table.insert state.falling-mushrooms falling-mushroom))
 
 (fn cauldron-clear []
   (set state.falling-mushrooms [])
   (set state.notes []))
 
-(fn test.keypressed [{:key key}]
-  (if (= key :a)
-      (love.event.quit)))
-
 (fn load-assets []
   (set assets.bell-sound (love.audio.newSource :assets/bell.wav :static))
+  (set assets.complete-sound (love.audio.newSource :assets/complete.mp3 :static))
   (set assets.water-sound (love.audio.newSource :assets/water.wav :static))
   (set assets.background (love.graphics.newImage :assets/mushroomcauldronbackground.png))
+  (set assets.bigbook (love.graphics.newImage :assets/bigbook.png))
+  (set assets.littlebook (love.graphics.newImage :assets/littlebook.png))
   (set assets.cauldron-sheet (love.graphics.newImage :assets/cauldron.png))
   (set assets.cauldron-animation-grid
        (anim8.newGrid 76 49
@@ -71,8 +74,6 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                       (assets.mushroom-sheet:getHeight))))
 
 (fn test.load []
-  (ebus.clear-subscriptions)
-  (ebus.subscribe :keypressed test.keypressed)
   (ebus.subscribe :note-played mushroom-played)
   (ebus.subscribe :cauldron-cleared cauldron-clear)
   (load-assets)
@@ -96,6 +97,8 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
                         (mushroom.new {:x (* 46 7) :y 200 :width 44 :height 44 
                                        :sound assets.bell-sound :tone :high-c})])
 
+  (set state.littlebook (book.new {:x 285 :y 140}))
+
   (set state.startTime (love.timer.getTime)))
 
 (fn test.update [dt]
@@ -106,6 +109,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
       (when (and (util.notes-equal? state.notes state.tab.song.notes)
                  (not state.tab.completed?))
         (set state.tab.completed? true)
+        (: (assets.complete-sound:clone) :play)
         (set state.notes [])
         (ebus.push :song-played state.tab.song)
         (tab.dismiss state.tab 
@@ -120,14 +124,14 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.update m dt))
+  (book.update state.littlebook dt)
   (tab.update state.tab dt))
 
 (fn test.draw []
   (lg.draw assets.background 0 0 0 2 2)
-  ;;(lg.print (love.timer.getFPS) (- _G.game-width 70) 0 0 1)
   (if state.win? 
-      (lg.print state.elapsedTime (- _G.game-width 70) 0 0 1)
-      (lg.print (- (love.timer.getTime) state.startTime) (- _G.game-width 70) 0 0 1))
+      (lg.print (string.format "%.2f" state.elapsedTime) (- _G.game-width 40) 0 0 1)
+      (lg.print (string.format "%.2f" (- (love.timer.getTime) state.startTime)) (- _G.game-width 40) 0 0 1))
   (cauldron.draw state.cauldron)
   (each [_ m (pairs state.mushrooms)] 
     (mushroom.draw m))
@@ -158,10 +162,26 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
       (lg.setColor color))
     (lg.rectangle :fill (- (* i 8) 6) (- _G.game-height 8) 6 6))
   (lg.setColor 1 1 1)
+  (book.draw state.littlebook)
   (tab.draw state.tab)
 
   (when state.win?
     (lg.print "You win!" 120 (- (/ _G.game-height 2) 80)
               0 2 2)))
+
+(fn test.keypressed [key]
+  (if (= key :a)
+      (love.event.quit))
+
+  (each [_ m (pairs state.mushrooms)] 
+    (mushroom.keypressed m key))
+  (cauldron.keypressed state.cauldron key))
+
+(fn test.mousepressed [x y button istouch presses]
+  (each [_ m (pairs state.mushrooms)] 
+    (mushroom.on-click m))
+  (cauldron.on-click state.cauldron))
+
+(fn test.mousereleased [x y button istouch presses])
 
 test

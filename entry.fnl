@@ -1,5 +1,4 @@
 (require :lib.repl)
-(local tick (require :lib.tick))
 (local scene-manager (require :scene_manager))
 (local fennel (require :lib.fennel))
 (local ebus (require :event-bus))
@@ -12,8 +11,6 @@
 (local test-scene (require :test_scene))
 
 (fn love.load []
-  ;;(set tick.framerate 60)
-
   (love.graphics.setDefaultFilter "nearest" "nearest")
   (push:setupScreen _G.game-width
                     _G.game-height
@@ -42,14 +39,10 @@
   (push:resize w h))
 
 (fn love.keypressed [key]
-  (ebus.push :keypressed {:key key}))
+  (scene-manager.keypressed key))
 
 (fn love.mousepressed [x y button istouch presses]
-  (ebus.push :mousepressed {:x x :y y :button button
-                            :istouch istouch
-                            :presses presses}))
+  (scene-manager.mousepressed x y button istouch presses))
 
 (fn love.mousereleased [x y button istouch presses]
-  (ebus.push :mousereleased {:x x :y y :button button
-                            :istouch istouch
-                            :presses presses}))
+  (scene-manager.mousereleased x y button istouch presses))

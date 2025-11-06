@@ -33,11 +33,11 @@
   (set cauldron.empty true)
   (: (assets.water-sound:clone) :play))
 
-(fn on-click [cauldron event]
+(fn on-click [cauldron]
   (when (util.cursor-within? cauldron)
     (activate cauldron)))
 
-(fn keypressed [cauldron {: key}]
+(fn keypressed [cauldron key]
   (when (= :space key)
     (activate cauldron)))
 
@@ -55,10 +55,8 @@
         :active (anim8.newAnimation (assets.cauldron-animation-grid "1-11" 1) 0.1)})
   (set cauldron.animation cauldron.animations.idle)
   (let [c cauldron]
-    (ebus.subscribe :mousepressed (partial on-click c))
-    (ebus.subscribe :keypressed (partial keypressed c))
     (ebus.subscribe :note-played (partial mushroom-played c))
     (ebus.subscribe :song-played (partial song-played c))
     c))
 
-{: new : draw : update }
+{: new : draw : update : keypressed : on-click}

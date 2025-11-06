@@ -9,7 +9,7 @@
   (set assets.customers (lg.newImage :assets/customers.png))
   (set assets.tab (lg.newImage :assets/chartab.png)))
 
-(fn update [cauldron notes dt])
+(fn update [chartab dt])
 
 (fn draw [tab]
   (lg.setColor 1 1 1 0.8)
@@ -26,12 +26,12 @@
         img (. portraits (love.math.random 3))
         new-tab {:character-img img :x -100 :y 20
                  :song song}]
-    (-> (flux.to new-tab 2 {:x 0})
+    (-> (flux.to new-tab 1.5 {:x 0})
         (: :ease "elasticout"))
     new-tab))
 
 (fn dismiss [tab callback]
-  (-> (flux.to tab 1 {:x -200})
+  (-> (flux.to tab 0.25 {:x -200})
       (: :ease "quadout")
       (: :oncomplete callback)))
 

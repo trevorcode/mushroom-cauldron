@@ -37,12 +37,11 @@
       (s:setPitch mushroom.pitch)
       (s:play))))
 
-(fn on-click [mushroom event]
+(fn on-click [mushroom]
   (when (util.cursor-within? mushroom)
-
     (activate mushroom)))
 
-(fn keypressed [mushroom {: key}]
+(fn keypressed [mushroom key]
   (when (= mushroom.key key)
     (activate mushroom)))
 
@@ -95,4 +94,4 @@
     (ebus.subscribe :keypressed (partial keypressed m))
     m))
 
-{: new : draw : update }
+{: new : draw : update : on-click : keypressed }
