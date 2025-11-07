@@ -6,9 +6,10 @@
 
 (local lg love.graphics)
 (local start-button (button.new
-                     {:x 50 :y 50 :text "Play"
-                      :width 100 :height 80
-                      :t-off-x 0 :t-off-y 0
+                     {:x 145 :y 160 :text "Play"
+                      :width 100 :height 45
+                      :t-off-x 12 :t-off-y 7
+                      :txt-size 2 :keybinding :space
                       :onclick (fn []
                                  (ebus.push :change-scene {:new-scene :game-scene}))}))
 
@@ -17,6 +18,7 @@
   (button.update start-button dt))
 
 (fn scene.draw []
+  (lg.draw assets.title-background 0 0 0 2 2)
   (button.draw start-button))
 
 (fn scene.keypressed [key]

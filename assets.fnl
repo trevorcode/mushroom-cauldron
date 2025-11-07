@@ -12,10 +12,10 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
     }
 
     float alpha = 0.0;
-    alpha += Texel(texture, uv + vec2(stepSize.x, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(-stepSize.x, 0.0f)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, stepSize.y)).a;
-    alpha += Texel(texture, uv + vec2(0.0f, -stepSize.y)).a;
+    alpha += Texel(texture, uv + vec2(stepSize.x, 0.0)).a;
+    alpha += Texel(texture, uv + vec2(-stepSize.x, 0.0)).a;
+    alpha += Texel(texture, uv + vec2(0.0, stepSize.y)).a;
+    alpha += Texel(texture, uv + vec2(0.0, -stepSize.y)).a;
 
     if (alpha > 0.0) {
       return outlineColor;
@@ -27,6 +27,7 @@ vec4 effect(vec4 color, Image texture, vec2 uv, vec2 screenCoords) {
 ")
 
 (fn assets.load-assets []
+  (set assets.title-background (love.graphics.newImage :assets/titlepage.png))
   (set assets.outline-shader (love.graphics.newShader outline-shader-code))
   (set assets.bell-sound (love.audio.newSource :assets/bell.wav :static))
   (set assets.complete-sound (love.audio.newSource :assets/complete.mp3 :static))

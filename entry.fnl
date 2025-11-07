@@ -1,6 +1,6 @@
-(require :lib.repl)
+;;(require :lib.repl)
 (local scene-manager (require :scene_manager))
-(local fennel (require :lib.fennel))
+;;(local fennel (require :lib.fennel))
 (local ebus (require :event-bus))
 
 (local assets (require :assets))

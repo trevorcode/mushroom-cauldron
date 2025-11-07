@@ -88,6 +88,7 @@
   (each [i m (pairs state.falling-mushrooms)] 
     (when (< 135 m.y)
       (table.insert state.notes m.note)
+      (print (fennel.view state.notes))
       (when (and (util.notes-equal? state.notes state.tab.song.notes)
                  (not state.tab.completed?))
         (set state.tab.completed? true)
