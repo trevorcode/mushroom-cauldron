@@ -1,7 +1,6 @@
 (local scene {})
 (local ebus (require :event-bus))
 (var state (require :game-scene-state))
-(local fennel (require :lib.fennel))
 (local util (require :util))
 (local songs (require :songs))
 (local assets (require :assets))
@@ -88,7 +87,6 @@
   (each [i m (pairs state.falling-mushrooms)] 
     (when (< 135 m.y)
       (table.insert state.notes m.note)
-      (print (fennel.view state.notes))
       (when (and (util.notes-equal? state.notes state.tab.song.notes)
                  (not state.tab.completed?))
         (set state.tab.completed? true)
