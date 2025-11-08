@@ -1,4 +1,21 @@
-For the 2025 fall lisp game jam
+
+Made for the 2025 autumn lisp game jam
+
+Instructions:
+
+A musical mushroom memory game! You play as a mushroom witch, and your goal is to fill out potion orders. An order will pop up at the top left of the screen, click on your recipe book to see the recipe in how to create/play the order. Click the mushrooms in the correct order in order to play the song.
+
+Keybinds:
+
+QWERUIOP: Mushrooms
+
+Space: Clear Cauldron
+
+H: Recipe/Instruction book
+
+
+
+Credits: 
 
 Bell noise:
 https://opengameart.org/content/point-bell
