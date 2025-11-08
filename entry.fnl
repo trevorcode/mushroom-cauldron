@@ -14,8 +14,8 @@
   (love.graphics.setDefaultFilter "nearest" "nearest")
   (push:setupScreen _G.game-width
                     _G.game-height
-                    (* 0.4 window-width)
-                    (* 0.4 window-height)
+                    (* 2 _G.game-width)
+                    (* 2 _G.game-height)
                     {:vsync true :resizable true})
   (local myFont (love.graphics.newImageFont
                  :assets/imagefont.png
